@@ -1,4 +1,5 @@
 //jshint esversion:6
+import 'dotenv/config';
 import express from "express";
 import bodyParser from "body-parser";
 import ejs from "ejs";
@@ -20,7 +21,7 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static("public"));
 //app.set('view engine','ejs');
 
-const secretKey = "secretkey";
+
 app.get("/", (req,res)=>{
     res.render("home.ejs");
 });
@@ -37,7 +38,7 @@ app.post("/register", async(req,res) =>{
     const password = req.body.password;
     try{
         await db.query("INSERT INTO user_detail (email, password) VALUES ($1, pgp_sym_encrypt(($2), ($3)))", 
-        [email, password, secretKey]);
+        [email, password, process.env.SECRET]);
     }catch(err)
     {
         console.log(err);
@@ -51,7 +52,7 @@ app.post("/login", async(req,res) =>{
     const password = req.body.password;
     try{
       user = await db.query("SELECT email, pgp_sym_decrypt(password, ($1)) AS password FROM user_detail WHERE email=($2)",
-       [secretKey, email]);
+       [process.env.SECRET, email]);
      
     }catch(err)
     {
