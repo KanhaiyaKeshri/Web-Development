@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static("public"));
 //app.set('view engine','ejs');
 
+const secretKey = "secretkey";
 app.get("/", (req,res)=>{
     res.render("home.ejs");
 });
@@ -35,7 +36,8 @@ app.post("/register", async(req,res) =>{
     const email = req.body.username;
     const password = req.body.password;
     try{
-    await db.query("INSERT INTO user_detail (email,password) VALUES ($1,$2)",[email,password]);
+        await db.query("INSERT INTO user_detail (email, password) VALUES ($1, pgp_sym_encrypt(($2), ($3)))", 
+        [email, password, secretKey]);
     }catch(err)
     {
         console.log(err);
@@ -48,7 +50,8 @@ app.post("/login", async(req,res) =>{
     const email = req.body.username;
     const password = req.body.password;
     try{
-      user = await db.query("SELECT password FROM user_detail WHERE email = $1",[email]);
+      user = await db.query("SELECT email, pgp_sym_decrypt(password, ($1)) AS password FROM user_detail WHERE email=($2)",
+       [secretKey, email]);
      
     }catch(err)
     {
