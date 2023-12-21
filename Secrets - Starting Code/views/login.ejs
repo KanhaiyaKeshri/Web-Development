@@ -7,7 +7,15 @@
     <div class="col-sm-8">
       <div class="card">
         <div class="card-body">
-
+          <ul>
+            <li>
+          <% if (message && message.length > 0) { %>
+            
+              <%= message %>
+        
+          <% } %>
+        </li>
+        </ul>
           <!-- Makes POST request to /login route -->
           <form action="/login" method="POST">
             <div class="form-group">
