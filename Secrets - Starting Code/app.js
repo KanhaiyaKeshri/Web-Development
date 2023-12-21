@@ -12,7 +12,7 @@ import flash from 'express-flash';
 
 const app = express();
 const port = 3000;
- const saltRounds = 10;
+
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static("public"));
 //app.set('view engine','ejs');
@@ -44,7 +44,7 @@ passport.use(new LocalStrategy(async (email, password, done) => {
       const userObj = user.rows[0];
   
       if (!userObj) {
-        return done(null, false, { message: 'Incorrect email.' });
+        return done(null, false, { message: 'Incorrect email, Try Again.' });
       }
   
       bcrypt.compare(password, userObj.password, (err, result) => {
@@ -55,7 +55,7 @@ passport.use(new LocalStrategy(async (email, password, done) => {
         if (result) {
           return done(null, userObj);
         } else {
-          return done(null, false, { message: 'Incorrect password.' });
+          return done(null, false, { message: 'Incorrect password, Try Again.' });
         }
       });
     } catch (err) {
@@ -94,7 +94,7 @@ app.post("/register", async (req, res) => {
     const email = req.body.username;
     const password = req.body.password;
   
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
+    bcrypt.hash(password, parseInt(process.env.SALTROUNDS), async (err, hash) => {
       try {
         await db.query("INSERT INTO user_detail (email, password) VALUES ($1, $2)", [email, hash]);
         res.render("secrets.ejs");
